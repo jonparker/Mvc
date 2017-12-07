@@ -27,6 +27,21 @@ namespace Microsoft.AspNetCore.Mvc.Authorization
         }
 
         [Fact]
+        public async Task AuthorizeFilter_CreatedWithDefaultConstructor_ThrowsWhenOnAuthorizationAsyncIsCalled()
+        {
+            // Arrange
+            var authorizeFilter = new AuthorizeFilter();
+            var authorizationContext = GetAuthorizationContext();
+            var expected = "An AuthorizationPolicy cannot be created without a valid instance of " +
+                "IAuthorizationPolicyProvider.";
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => authorizeFilter.OnAuthorizationAsync(authorizationContext));
+            Assert.Equal(expected, ex.Message);
+        }
+
+        [Fact]
         public async Task AuthorizeFilter_CreatedWithAuthorizeData_ThrowsWhenOnAuthorizationAsyncIsCalled()
         {
             // Arrange
