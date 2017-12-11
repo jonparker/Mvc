@@ -27,18 +27,23 @@ namespace Microsoft.AspNetCore.Mvc.Authorization
         }
 
         [Fact]
-        public async Task AuthorizeFilter_CreatedWithDefaultConstructor_ThrowsWhenOnAuthorizationAsyncIsCalled()
+        public async Task DefaultConstructor_DeniesAnonymousUsers()
         {
             // Arrange
-            var authorizeFilter = new AuthorizeFilter();
-            var authorizationContext = GetAuthorizationContext();
-            var expected = "An AuthorizationPolicy cannot be created without a valid instance of " +
-                "IAuthorizationPolicyProvider.";
+            var authorizationContext = GetAuthorizationContext(anonymous: true);
+            // The type 'AuthorizeFilter' is both a filter by itself and also a filter factory.
+            // The default filter provider first checks if a type is a filter factory and creates an instance of
+            // this filter.
+            var authorizeFilterFactory = new AuthorizeFilter();
+            var filterFactory = authorizeFilterFactory as IFilterFactory;
+            var authorizeFilter = (AuthorizeFilter)filterFactory.CreateInstance(
+                authorizationContext.HttpContext.RequestServices);
 
-            // Act & Assert
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => authorizeFilter.OnAuthorizationAsync(authorizationContext));
-            Assert.Equal(expected, ex.Message);
+            // Act
+            await authorizeFilter.OnAuthorizationAsync(authorizationContext);
+
+            // Assert
+            Assert.IsType<ChallengeResult>(authorizationContext.Result);
         }
 
         [Fact]

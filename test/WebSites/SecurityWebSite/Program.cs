@@ -13,7 +13,7 @@ namespace SecurityWebSite
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseStartup<StartupWithGlobalDenyAnonymousFilter>()
+                .UseStartup<Startup>()
                 .Build();
 
             host.Run();
